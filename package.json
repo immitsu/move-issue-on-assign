@@ -1,0 +1,39 @@
+{
+  "name": "move-issue-on-assign",
+  "version": "0.1.0",
+  "description": "Automatically move issues between columns in GitHub Projects when assigned or unassigned",
+  "keywords": [
+    "github-actions",
+    "github-projects",
+    "automation",
+    "issues",
+    "project-management",
+    "workflow",
+    "assigned",
+    "auto-move"
+  ],
+  "files": [
+    "dist/",
+    "action.yml",
+    "readme.md"
+  ],
+  "scripts": {
+    "build": "node src/build.mjs"
+  },
+  "license": "MIT",
+  "author": "Michael Tsulaya <metsulaya@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/immitsu/move-issue-on-assign"
+  },
+  "dependencies": {
+    "@actions/core": "^1.11.1",
+    "@actions/github": "^6.0.1"
+  },
+  "devDependencies": {
+    "esbuild": "^0.27.0",
+    "eslint-plugin-perfectionist": "^4.15.1",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.3"
+  }
+}

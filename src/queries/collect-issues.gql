@@ -1,0 +1,28 @@
+query ($owner: String!, $projectNumber: Int!, $after: String) {
+  organization(login: $owner) {
+    projectV2(number: $projectNumber) {
+      id
+      title
+      number
+      items(first: 100, after: $after) {
+        nodes {
+          id
+          fieldValueByName(name: "Status") {
+            ... on ProjectV2ItemFieldSingleSelectValue {
+              name
+            }
+          }
+          content {
+            ... on Issue {
+              number
+            }
+          }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
+        }
+      }
+    }
+  }
+}

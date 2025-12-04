@@ -1,0 +1,25 @@
+query ($owner: String!, $projectNumber: Int!) {
+  organization(login: $owner) {
+    projectV2(number: $projectNumber) {
+      id
+      title
+      number
+      fields(first: 20) {
+        nodes {
+          ... on ProjectV2Field {
+            id
+            name
+          }
+          ... on ProjectV2SingleSelectField {
+            id
+            name
+            options {
+              id
+              name
+            }
+          }
+        }
+      }
+    }
+  }
+}
