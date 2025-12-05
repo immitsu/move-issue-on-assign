@@ -1,6 +1,6 @@
 {
   "name": "move-issue-on-assign",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Automatically move issues between columns in GitHub Projects when assigned or unassigned",
   "keywords": [
     "github-actions",
