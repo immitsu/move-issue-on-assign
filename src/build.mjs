@@ -26,6 +26,7 @@ const run = () => {
   build({
     bundle: true,
     entryPoints: ['src/main.mjs'],
+    minify: true,
     outfile: 'dist/index.cjs',
     platform: 'node',
     plugins: [graphqlPlugin],

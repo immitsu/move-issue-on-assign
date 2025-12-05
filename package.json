@@ -17,8 +17,9 @@
     "action.yml",
     "readme.md"
   ],
+  "main": "dist/index.cjs",
   "scripts": {
-    "build": "node src/build.mjs"
+    "build": "rm -rf dist/ && node src/build.mjs"
   },
   "license": "MIT",
   "author": "Michael Tsulaya <metsulaya@gmail.com>",
