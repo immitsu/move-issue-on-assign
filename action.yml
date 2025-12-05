@@ -1,21 +1,28 @@
-name: 'Move assigned issue in project'
-description: 'Automatically move assigned issues from specified columns to target column in GitHub Projects'
+name: 'Move Issue on Assign'
+description: 'Automatically move issues between columns in GitHub Projects V2 when assigned or unassigned'
+branding:
+  icon: 'list'
+  color: 'blue'
+
 inputs:
   token:
-    description: 'Fine-grained token with read/write permissions for organization projects and repository issues'
+    description: 'Fine-grained token with permissions for organization projects (read/write) and repository issues (read)'
     required: true
   project:
-    description: 'Project number'
+    description: 'Project number (found in project URL)'
     required: true
   owner:
-    description: 'Organization name'
+    description: 'Organization name containing the project'
     required: true
   watch:
-    description: 'Column name(s) to watch for assigned issues (comma-separated)'
+    description: 'Column names to watch for assigned issues (comma-separated)'
+    required: false
     default: 'Todo'
   moveTo:
     description: 'Column to move issue to when assigned'
+    required: false
     default: 'In Progress'
+
 runs:
   using: 'node20'
   main: 'dist/index.cjs'

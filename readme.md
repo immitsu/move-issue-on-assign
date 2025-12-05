@@ -1,6 +1,6 @@
 # Move Issue on Assign
 
-A GitHub Action to automatically move issues between columns in GitHub Projects when they are assigned or unassigned.
+A GitHub Action to automatically move issues between columns in GitHub Projects V2 when they are assigned or unassigned.
 
 **Note:** This action currently supports only organization projects.
 GitHub Projects can belong to organizations, users, or repositories.
