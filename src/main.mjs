@@ -8,7 +8,6 @@ import moveIssueMutation from './queries/move-issue.gql'
 import { invariant } from './utils.mjs'
 
 const TOKEN = getInput('token', { required: true })
-const OWNER = getInput('owner', { required: true })
 const PROJECT_NUMBER = Number(getInput('project'), { required: true })
 const TARGET_STATUS = getInput('moveTo') || STATUS_DEFAULTS.TARGET
 const SOURCE_STATUS = getInput('watch') || STATUS_DEFAULTS.SOURCE
@@ -19,6 +18,7 @@ invariant(
   `Project number must be a positive integer, got: ${PROJECT_NUMBER}`,
 )
 
+const OWNER = context.repo.owner
 const ACTION = context.payload.action
 const ISSUE_ASSIGNEES = context.payload.issue.assignees
 const ISSUE_NUMBER = context.payload.issue.number

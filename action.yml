@@ -11,9 +11,6 @@ inputs:
   project:
     description: 'Project number (found in project URL)'
     required: true
-  owner:
-    description: 'Organization name containing the project'
-    required: true
   watch:
     description: 'Column names to watch for assigned issues (comma-separated)'
     required: false

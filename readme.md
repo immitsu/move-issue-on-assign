@@ -24,7 +24,6 @@ jobs:
         with:
           token: ${{ secrets.PROJECT_PAT }}
           project: 1
-          owner: ${{ github.repository_owner }}
           watch: 'Todo, Backlog'
           moveTo: 'In Progress'
 ```
@@ -41,6 +40,5 @@ on:
 
 - **token** [required]: Fine-grained token with permissions for organization projects (read/write) and repository issues (read);
 - **project** [required]: Project number (found in project URL);
-- **owner** [required]: Organization name containing the project;
 - **watch** [optional]: Column names to watch for assigned issues (comma-separated), default: `Todo`;
 - **moveTo** [optional]: Column to move issue to when assigned, default: `In Progress`.
