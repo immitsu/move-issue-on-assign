@@ -1,11 +1,8 @@
 # Move Issue on Assign
 
-![GitHub Release](https://img.shields.io/github/v/release/immitsu/move-issue-on-assign)
-
 A GitHub Action to automatically move issues between columns in GitHub Projects V2 when they are assigned or unassigned.
 
-**Note:** This action currently supports only organization projects.
-GitHub Projects can belong to organizations, users, or repositories.
+**Note on Compatibility:** GitHub Projects can belong to organizations, users, or repositories. This action currently supports only organization projects.
 
 ## Usage
 
@@ -35,6 +32,8 @@ on:
   issues:
     types: [assigned, unassigned]
 ```
+
+In that case, completely unassigned issues automatically move to the first "watch" column.
 
 ## Inputs
 
