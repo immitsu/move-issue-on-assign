@@ -1,5 +1,7 @@
 # Move Issue on Assign
 
+![GitHub Release](https://img.shields.io/github/v/release/immitsu/move-issue-on-assign)
+
 A GitHub Action to automatically move issues between columns in GitHub Projects V2 when they are assigned or unassigned.
 
 **Note:** This action currently supports only organization projects.
@@ -18,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Move issue on assign
-        uses: immitsu/move-issue-on-assign@v1.0.0
+        uses: immitsu/move-issue-on-assign@v1.1.0
         with:
           token: ${{ secrets.PROJECT_PAT }}
           project: 1
