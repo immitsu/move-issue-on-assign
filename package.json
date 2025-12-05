@@ -19,7 +19,7 @@
   ],
   "main": "dist/index.cjs",
   "scripts": {
-    "build": "rm -rf dist/ && node src/build.mjs"
+    "build": "rm -rf dist/ && node scripts/build.mjs"
   },
   "license": "MIT",
   "author": "Michael Tsulaya <metsulaya@gmail.com>",
