@@ -5,51 +5,51 @@ import { ACTIONS, MESSAGES, STATUS_DEFAULTS } from './const.mjs'
 import collectIssuesQuery from './queries/collect-issues.gql'
 import getProjectQuery from './queries/get-project.gql'
 import moveIssueMutation from './queries/move-issue.gql'
-import { invariant } from './utils.mjs'
+import { invariant, splitString } from './utils.mjs'
 
-const TOKEN = getInput('token', { required: true })
-const PROJECT_NUMBER = Number(getInput('project'), { required: true })
-const TARGET_STATUS = getInput('moveTo') || STATUS_DEFAULTS.TARGET
-const SOURCE_STATUS = getInput('watch') || STATUS_DEFAULTS.SOURCE
-const SOURCE_STATUS_ARR = SOURCE_STATUS.split(',').map(s => s.trim())
+const $token = getInput('token', { required: true })
+const $projectNumber = Number(getInput('project'), { required: true })
+const $targetStatus = getInput('moveTo') || STATUS_DEFAULTS.TARGET
+const $sourceStatus = getInput('watch') || STATUS_DEFAULTS.SOURCE
+const $sourceStatusArr = splitString($sourceStatus)
 
 invariant(
-  Number.isInteger(PROJECT_NUMBER) && PROJECT_NUMBER > 0,
-  `Project number must be a positive integer, got: ${PROJECT_NUMBER}`,
+  Number.isInteger($projectNumber) && $projectNumber > 0,
+  `Project number must be a positive integer, got: ${$projectNumber}`,
 )
 
-const OWNER = context.repo.owner
-const ACTION = context.payload.action
-const ISSUE_ASSIGNEES = context.payload.issue.assignees
-const ISSUE_NUMBER = context.payload.issue.number
+const $owner = context.repo.owner
+const $action = context.payload.action
+const $issueAssignees = context.payload.issue.assignees
+const $issueNumber = context.payload.issue.number
 
-const octokit = getOctokit(TOKEN)
+const $octokit = getOctokit($token)
 
 const getActionBasedQueryParams = () => {
-  const wasAssigned = ACTION === ACTIONS.ASSIGNED
+  const wasAssigned = $action === ACTIONS.ASSIGNED
 
   if (wasAssigned) {
     return {
-      issuesFilter: SOURCE_STATUS_ARR,
-      targetStatus: TARGET_STATUS,
+      issuesFilter: $sourceStatusArr,
+      targetStatus: $targetStatus,
     }
   }
 
-  const wasUnassigned = ACTION === ACTIONS.UNASSIGNED
-  const shouldMoveBack = wasUnassigned && !ISSUE_ASSIGNEES?.length
+  const wasUnassigned = $action === ACTIONS.UNASSIGNED
+  const shouldMoveBack = wasUnassigned && !$issueAssignees?.length
 
   if (shouldMoveBack) {
     return {
-      issuesFilter: [TARGET_STATUS],
-      targetStatus: SOURCE_STATUS_ARR[0],
+      issuesFilter: [$targetStatus],
+      targetStatus: $sourceStatusArr[0],
     }
   }
 }
 
 const getProject = async () => {
-  const response = await octokit.graphql(getProjectQuery, {
-    owner: OWNER,
-    projectNumber: PROJECT_NUMBER,
+  const response = await $octokit.graphql(getProjectQuery, {
+    owner: $owner,
+    projectNumber: $projectNumber,
   })
 
   invariant(response.organization.projectV2, MESSAGES.PROJECT_NOT_FOUND)
@@ -63,10 +63,10 @@ const getProjectIssuesByFilter = async filter => {
   let endCursor = null
 
   do {
-    const response = await octokit.graphql(collectIssuesQuery, {
+    const response = await $octokit.graphql(collectIssuesQuery, {
       after: endCursor,
-      owner: OWNER,
-      projectNumber: PROJECT_NUMBER,
+      owner: $owner,
+      projectNumber: $projectNumber,
     })
 
     invariant(response.organization.projectV2, MESSAGES.PROJECT_NOT_FOUND)
@@ -112,7 +112,7 @@ const main = async () => {
       return
     }
 
-    const issue = issues.find(x => x.content.number == ISSUE_NUMBER)
+    const issue = issues.find(x => x.content.number == $issueNumber)
 
     if (!issue) {
       skipWithNotice(MESSAGES.ISSUE_NOT_FOUND)
@@ -132,7 +132,7 @@ const main = async () => {
       `${MESSAGES.STATUS_OPTION_NOT_FOUND} ("${targetStatus}")`,
     )
 
-    await octokit.graphql(moveIssueMutation, {
+    await $octokit.graphql(moveIssueMutation, {
       fieldId: statusField.id,
       issueId: issue.id,
       optionId: statusOption.id,
@@ -140,7 +140,7 @@ const main = async () => {
     })
 
     info(
-      `Successfully moved issue #${ISSUE_NUMBER} to "${targetStatus}" in project "${project.title}"`,
+      `Successfully moved issue #${$issueNumber} to "${targetStatus}" in project "${project.title}"`,
     )
   } catch (error) {
     setFailed(error.message)
