@@ -1,11 +1,11 @@
 import { getInput, info, notice, setFailed } from '@actions/core'
 import { context, getOctokit } from '@actions/github'
 
-import { ACTIONS, MESSAGES, STATUS_DEFAULTS } from './const.mjs'
+import { ACTIONS, MESSAGES, STATUS_DEFAULTS } from './const.js'
 import collectIssuesQuery from './queries/collect-issues.gql'
 import getProjectQuery from './queries/get-project.gql'
 import moveIssueMutation from './queries/move-issue.gql'
-import { invariant, splitString } from './utils.mjs'
+import { invariant, splitString } from './utils.js'
 
 const $token = getInput('token', { required: true })
 const $projectNumber = Number(getInput('project'), { required: true })
@@ -91,7 +91,7 @@ const skipWithNotice = message => {
   notice(`${message} – skipping`)
 }
 
-const main = async () => {
+export const run = async () => {
   try {
     const queryParams = getActionBasedQueryParams()
 
@@ -146,5 +146,3 @@ const main = async () => {
     setFailed(error.message)
   }
 }
-
-main()

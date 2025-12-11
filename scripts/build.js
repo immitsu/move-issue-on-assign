@@ -25,7 +25,7 @@ const run = () => {
 
   build({
     bundle: true,
-    entryPoints: ['src/main.mjs'],
+    entryPoints: ['src/index.js'],
     minify: true,
     outfile: 'dist/index.cjs',
     platform: 'node',

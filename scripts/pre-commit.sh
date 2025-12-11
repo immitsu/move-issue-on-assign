@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if git diff --cached --name-only | grep -q 'src/main.mjs'; then
-  echo '👀 src/main.mjs changed, running build...'
+if git diff --cached --name-only | grep -q 'src/main.js'; then
+  echo '👀 src/main.js changed, running build...'
   pnpm run build
   git add dist/
 fi
