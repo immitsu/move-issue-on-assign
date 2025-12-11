@@ -1,3 +1,5 @@
+export const STATUS_FIELD_NAME_FROM_GH = 'Status'
+
 export const STATUS_DEFAULTS = {
   SOURCE: 'Todo',
   TARGET: 'In Progress',

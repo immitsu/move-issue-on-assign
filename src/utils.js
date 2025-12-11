@@ -4,7 +4,7 @@ export const invariant = (condition, message) => {
   }
 }
 
-export const splitString = (text, delimiter = ',') =>
+export const delimitString = (text, delimiter = ',') =>
   text
     .split(delimiter)
     .map(part => part.trim())

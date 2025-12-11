@@ -1,83 +1,51 @@
-import { getInput, info, notice, setFailed } from '@actions/core'
-import { context, getOctokit } from '@actions/github'
-
-import { ACTIONS, MESSAGES, STATUS_DEFAULTS } from './const.js'
+import { ACTIONS, MESSAGES, STATUS_FIELD_NAME_FROM_GH } from './const.js'
+import { $ctx } from './ctx.js'
 import collectIssuesQuery from './queries/collect-issues.gql'
 import getProjectQuery from './queries/get-project.gql'
 import moveIssueMutation from './queries/move-issue.gql'
-import { invariant, splitString } from './utils.js'
-
-const $token = getInput('token', { required: true })
-const $projectNumber = Number(getInput('project'), { required: true })
-const $targetStatus = getInput('moveTo') || STATUS_DEFAULTS.TARGET
-const $sourceStatus = getInput('watch') || STATUS_DEFAULTS.SOURCE
-const $sourceStatusArr = splitString($sourceStatus)
+import { delimitString, invariant } from './utils.js'
 
 invariant(
-  Number.isInteger($projectNumber) && $projectNumber > 0,
-  `Project number must be a positive integer, got: ${$projectNumber}`,
+  Number.isInteger($ctx.projectNumber) && $ctx.projectNumber > 0,
+  `Project number must be a positive integer, got: ${$ctx.projectNumber}`,
 )
 
-const $owner = context.repo.owner
-const $action = context.payload.action
-const $issueAssignees = context.payload.issue.assignees
-const $issueNumber = context.payload.issue.number
-
-const $octokit = getOctokit($token)
-
-const getActionBasedQueryParams = () => {
-  const wasAssigned = $action === ACTIONS.ASSIGNED
-
-  if (wasAssigned) {
-    return {
-      issuesFilter: $sourceStatusArr,
-      targetStatus: $targetStatus,
-    }
-  }
-
-  const wasUnassigned = $action === ACTIONS.UNASSIGNED
-  const shouldMoveBack = wasUnassigned && !$issueAssignees?.length
-
-  if (shouldMoveBack) {
-    return {
-      issuesFilter: [$targetStatus],
-      targetStatus: $sourceStatusArr[0],
-    }
-  }
-}
-
 const getProject = async () => {
-  const response = await $octokit.graphql(getProjectQuery, {
-    owner: $owner,
-    projectNumber: $projectNumber,
+  const response = await $ctx.octokit.graphql(getProjectQuery, {
+    owner: $ctx.owner,
+    projectNumber: $ctx.projectNumber,
   })
 
-  invariant(response.organization.projectV2, MESSAGES.PROJECT_NOT_FOUND)
+  const project = response.organization.projectV2
 
-  return response.organization.projectV2
+  invariant(project, MESSAGES.PROJECT_NOT_FOUND)
+
+  return project
 }
 
 const getProjectIssuesByFilter = async filter => {
+  const filterSet = new Set(filter)
+
   let issues = []
   let hasNextPage = false
   let endCursor = null
 
   do {
-    const response = await $octokit.graphql(collectIssuesQuery, {
+    const response = await $ctx.octokit.graphql(collectIssuesQuery, {
       after: endCursor,
-      owner: $owner,
-      projectNumber: $projectNumber,
+      owner: $ctx.owner,
+      projectNumber: $ctx.projectNumber,
     })
 
-    invariant(response.organization.projectV2, MESSAGES.PROJECT_NOT_FOUND)
+    const project = response.organization.projectV2
 
-    const { items } = response.organization.projectV2
-    const { nodes, pageInfo } = items
+    invariant(project, MESSAGES.PROJECT_NOT_FOUND)
 
-    const filteredIssues = nodes.filter(item => {
-      const status = item.fieldValueByName.name
-      return filter.includes(status)
-    })
+    const { nodes, pageInfo } = project.items
+
+    const filteredIssues = nodes.filter(n =>
+      filterSet.has(n.fieldValueByName.name),
+    )
 
     issues = issues.concat(filteredIssues)
     hasNextPage = pageInfo.hasNextPage
@@ -87,62 +55,82 @@ const getProjectIssuesByFilter = async filter => {
   return issues
 }
 
-const skipWithNotice = message => {
-  notice(`${message} – skipping`)
+const getActionParams = () => {
+  const defaultParams = {
+    getFrom: delimitString($ctx.sourceStatus),
+    moveTo: $ctx.targetStatus,
+  }
+
+  if ($ctx.actionType === ACTIONS.ASSIGNED) {
+    return defaultParams
+  }
+
+  if (
+    $ctx.actionType === ACTIONS.UNASSIGNED &&
+    $ctx.issueAssignees.length === 0
+  ) {
+    return {
+      getFrom: [defaultParams.moveTo],
+      moveTo: defaultParams.getFrom[0],
+    }
+  }
+}
+
+const infoWithSkipping = message => {
+  $ctx.info(`${message} – skipping`)
 }
 
 export const run = async () => {
   try {
-    const queryParams = getActionBasedQueryParams()
+    const actionParams = getActionParams()
 
-    if (!queryParams) {
-      skipWithNotice(MESSAGES.NO_ACTION_REQUIRED)
+    if (!actionParams) {
+      infoWithSkipping(MESSAGES.NO_ACTION_REQUIRED)
       return
     }
 
-    const { issuesFilter, targetStatus } = queryParams
+    const { getFrom, moveTo } = actionParams
 
     const [project, issues] = await Promise.all([
       getProject(),
-      getProjectIssuesByFilter(issuesFilter),
+      getProjectIssuesByFilter(getFrom),
     ])
 
     if (issues.length === 0) {
-      skipWithNotice(MESSAGES.NO_WATCH_ISSUES)
+      infoWithSkipping(MESSAGES.NO_WATCH_ISSUES)
       return
     }
 
-    const issue = issues.find(x => x.content.number == $issueNumber)
+    const issue = issues.find(i => i.content.number == $ctx.issueNumber)
 
     if (!issue) {
-      skipWithNotice(MESSAGES.ISSUE_NOT_FOUND)
+      infoWithSkipping(MESSAGES.ISSUE_NOT_FOUND)
       return
     }
 
-    const statusField = project.fields.nodes.find(n => n.name === 'Status')
+    const statusField = project.fields.nodes.find(
+      n => n.name === STATUS_FIELD_NAME_FROM_GH,
+    )
 
     invariant(statusField, MESSAGES.STATUS_FIELD_NOT_FOUND)
 
     invariant(statusField.options, MESSAGES.STATUS_FIELD_NO_OPTIONS)
 
-    const statusOption = statusField.options.find(o => o.name === targetStatus)
+    const statusOption = statusField.options.find(o => o.name === moveTo)
 
-    invariant(
-      statusOption,
-      `${MESSAGES.STATUS_OPTION_NOT_FOUND} ("${targetStatus}")`,
-    )
+    invariant(statusOption, `${MESSAGES.STATUS_OPTION_NOT_FOUND} ("${moveTo}")`)
 
-    await $octokit.graphql(moveIssueMutation, {
+    await $ctx.octokit.graphql(moveIssueMutation, {
       fieldId: statusField.id,
       issueId: issue.id,
       optionId: statusOption.id,
       projectId: project.id,
     })
 
-    info(
-      `Successfully moved issue #${$issueNumber} to "${targetStatus}" in project "${project.title}"`,
+    $ctx.info(
+      `Successfully moved issue #${$ctx.issueNumber} to "${moveTo}" in project "${project.title}"`,
     )
   } catch (error) {
-    setFailed(error.message)
+    $ctx.setFailed(error.message)
   }
 }

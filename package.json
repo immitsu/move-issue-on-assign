@@ -20,7 +20,8 @@
   "main": "dist/index.cjs",
   "type": "module",
   "scripts": {
-    "build": "rm -rf dist/ && node scripts/build.js"
+    "build": "rm -rf dist/ && node scripts/build.js",
+    "test": "NODE_OPTIONS=--experimental-vm-modules NODE_NO_WARNINGS=1 npx jest"
   },
   "license": "MIT",
   "author": "Michael Tsulaya <metsulaya@gmail.com>",
@@ -36,6 +37,7 @@
     "esbuild": "^0.27.0",
     "eslint": "^9.39.1",
     "eslint-plugin-perfectionist": "^4.15.1",
+    "jest": "^30.2.0",
     "prettier": "^3.7.3",
     "simple-git-hooks": "^2.13.1"
   }
