@@ -5,7 +5,7 @@ import { STATUS_DEFAULTS } from './const.js'
 
 const token = getInput('token', { required: true })
 const projectNumber = Number(getInput('project', { required: true }))
-const targetStatus = getInput('moveTo') || STATUS_DEFAULTS.TARGET
+const targetStatus = getInput('move-to') || STATUS_DEFAULTS.TARGET
 const sourceStatus = getInput('watch') || STATUS_DEFAULTS.SOURCE
 
 const owner = context.repo.owner

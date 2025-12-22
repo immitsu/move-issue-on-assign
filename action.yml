@@ -15,7 +15,7 @@ inputs:
     description: 'Column names to watch for assigned issues (comma-separated)'
     required: false
     default: 'Todo'
-  moveTo:
+  move-to:
     description: 'Column to move issue to when assigned'
     required: false
     default: 'In Progress'
