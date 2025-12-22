@@ -33,7 +33,7 @@ on:
     types: [assigned, unassigned]
 ```
 
-In that case, completely unassigned issues automatically move to the first "watch" column.
+In that case, issues that become completely unassigned and are currently in the "moveTo" column automatically move back to the first "watch" column.
 
 ## Inputs
 
