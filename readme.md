@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Move issue on assign
-        uses: immitsu/move-issue-on-assign@v1.2.0
+        uses: immitsu/move-issue-on-assign@v2
         with:
           token: ${{ secrets.PROJECT_PAT }}
           project: 1
