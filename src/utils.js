@@ -1,6 +1,16 @@
+class InvariantError extends Error {
+  constructor(message) {
+    super(message)
+    this.name = 'InvariantError'
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, InvariantError)
+    }
+  }
+}
+
 export const invariant = (condition, message) => {
   if (!condition) {
-    throw new Error(message)
+    throw new InvariantError(message)
   }
 }
 
