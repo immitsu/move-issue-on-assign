@@ -1,4 +1,9 @@
-import { ACTIONS, MESSAGES, STATUS_FIELD_NAME_FROM_GH } from './const.js'
+import {
+  ACTIONS,
+  MESSAGES,
+  PAGINATION_LIMIT,
+  STATUS_FIELD_NAME_FROM_GH,
+} from './const.js'
 import { $ctx } from './ctx.js'
 import collectIssuesQuery from './queries/collect-issues.gql'
 import getProjectQuery from './queries/get-project.gql'
@@ -29,8 +34,11 @@ const getProjectIssuesByFilter = async filter => {
   let issues = []
   let hasNextPage = false
   let endCursor = null
+  let iteration = 0
 
   do {
+    invariant(++iteration <= PAGINATION_LIMIT, MESSAGES.PAGINATION_LIMIT)
+
     const response = await $ctx.octokit.graphql(collectIssuesQuery, {
       after: endCursor,
       owner: $ctx.owner,
