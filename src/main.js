@@ -41,6 +41,8 @@ const getProjectIssuesByFilter = async filter => {
 
     invariant(project, MESSAGES.PROJECT_NOT_FOUND)
 
+    if (!project.items) return
+
     const { nodes, pageInfo } = project.items
 
     const filteredIssues = nodes.filter(
@@ -101,7 +103,9 @@ export const run = async () => {
       return
     }
 
-    const issue = issues.find(i => i.content.number == $ctx.issueNumber)
+    const issue = issues.find(
+      i => i.content && i.content.number == $ctx.issueNumber,
+    )
 
     if (!issue) {
       infoWithSkipping(MESSAGES.ISSUE_NOT_FOUND)
