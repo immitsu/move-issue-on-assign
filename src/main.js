@@ -53,13 +53,16 @@ const getProjectIssuesByFilter = async filter => {
 
     const { nodes, pageInfo } = project.items
 
+    hasNextPage = pageInfo.hasNextPage
+    endCursor = pageInfo.endCursor
+
+    if (!nodes) continue
+
     const filteredIssues = nodes.filter(
       n => n.fieldValueByName && filterSet.has(n.fieldValueByName.name),
     )
 
     issues = issues.concat(filteredIssues)
-    hasNextPage = pageInfo.hasNextPage
-    endCursor = pageInfo.endCursor
   } while (hasNextPage)
 
   return issues
