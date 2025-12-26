@@ -43,8 +43,8 @@ const getProjectIssuesByFilter = async filter => {
 
     const { nodes, pageInfo } = project.items
 
-    const filteredIssues = nodes.filter(n =>
-      filterSet.has(n.fieldValueByName.name),
+    const filteredIssues = nodes.filter(
+      n => n.fieldValueByName && filterSet.has(n.fieldValueByName.name),
     )
 
     issues = issues.concat(filteredIssues)
